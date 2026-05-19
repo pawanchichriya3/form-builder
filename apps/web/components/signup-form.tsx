@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
 import { trpc } from "~/trpc/client"
 import { useSignup } from "~/hooks/api/auth"
 
@@ -20,10 +21,17 @@ export function SignupForm({
 
   const {createUserWithEmailAndPasswordAsync} = useSignup()
   const { register, handleSubmit } = useForm()
+  const router = useRouter()
 
   async function onSubmit(values: any) {
-    const result = await createUserWithEmailAndPasswordAsync({email: values.email, fullName: values.name, password: values.password});
-    console.log(result?.id);
+    try {
+      const result = await createUserWithEmailAndPasswordAsync({email: values.email, fullName: values.name, password: values.password});
+      console.log(result?.id);
+      // Redirect to login after successful signup
+      router.push('/login')
+    } catch (err) {
+      console.error('Signup failed', err);
+    }
   }
 
   return (

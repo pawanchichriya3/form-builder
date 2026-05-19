@@ -7,3 +7,16 @@ export const createUserWithEmailAndPasswordInput = z.object({
 })
 
 export type CreateUserWithEmailAndPasswordInputType = z.infer<typeof createUserWithEmailAndPasswordInput>
+
+export const generateUserTokenPayload = z.object({
+  id: z.string().describe('uuid of the user')
+})
+
+export type GenerateUserTokenPayloadType = z.infer<typeof generateUserTokenPayload>
+
+export const signInUserWithEmailAndPasswordInput = z.object({
+  email: z.email().describe('The email address of the user'),
+  password:z.string().describe('password of the user')
+})
+
+export type SignInUserWithEmailAndPasswordInputType = z.infer<typeof signInUserWithEmailAndPasswordInput>
