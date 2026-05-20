@@ -1,5 +1,5 @@
 import { userService } from "../../services";
-import { publicProcedure, router } from "../../trpc";
+import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import { createUserWithEmailAndPasswordInputModel, createUserWithEmailAndPasswordzOutputModel, getLoggedInUserInfoInputModel, getLoggedInUserInfoOutputModel, signInuserWithEmailAndPasswordInputModel, signInuserWithEmailAndPasswordOutputModel } from "./models";
@@ -43,7 +43,7 @@ export const authRouter = router({
       id
     }
   }),
-  getLoggedInUserInfo: publicProcedure.meta({
+  getLoggedInUserInfo: authenticatedProcedure.meta({
     openapi: {
       method:'GET',
       path: getPath('/getLoggedInUserInfo'),
@@ -51,15 +51,10 @@ export const authRouter = router({
     }
   }).input(getLoggedInUserInfoInputModel).output(getLoggedInUserInfoOutputModel)
   .query(async ({ctx}) => {
-    const userToken = getAuthenticationCookie(ctx);
 
-    if (!userToken) {
-      throw new Error('No authentication token found');
-    }
+    const user = await userService.getUserInfoById(ctx.user.id);
 
-    const user = await userService.verifyAndDecodeUserToken(userToken);
-
-    if (!user || !user.id || !user.email || !user.fullName) {
+    if (!user || !user.id) {
       throw new Error('Invalid or expired authentication token');
     }
 
