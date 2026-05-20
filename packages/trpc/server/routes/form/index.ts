@@ -1,7 +1,7 @@
-import { formService } from "../../services";
+import { formFieldService, formService } from "../../services";
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
-import { createFormInputModel, createFormOutputModel, listFormOutputModel } from "./model";
+import { createFieldInputModel, createFieldOutputModel, createFormInputModel, createFormOutputModel, listFormOutputModel } from "./model";
 import { z } from "zod";
 const TAGS = ["Form"];
 const getPath = generatePath("/form");
@@ -38,5 +38,18 @@ export const formRouter = router({
             createdAt: form.createdAt ?? new Date(),
             updatedAt: form.updatedAt ?? new Date()
         }));
-    })
+    }),
+
+    createFormField: authenticatedProcedure.meta({
+        openapi:{
+            method:"POST",
+            path: getPath("/createField"),
+            tags:TAGS,
+            protect:true
+        }
+    }).input(createFieldInputModel).output(createFieldOutputModel).mutation(async ({input}) => {
+
+        const {id, labelKey, index} = await formFieldService.createField(input);
+        return {id, labelKey, index}
+    }),
 })

@@ -13,7 +13,7 @@ import { formsTable } from "../schema";
 
 export const fieldTypeEnum = pgEnum("field_type_enum", ["TEXT", "NUMBER", "EMAIL", "PASSWORD", "YES_NO"]);
 
-export const fieldFieldsTable = pgTable("form_fields", {
+export const formFieldsTable = pgTable("form_fields", {
     id: uuid("id").primaryKey().defaultRandom(),
     formId: uuid("form_id").references(() => formsTable.id),
     label: varchar("label", { length: 255 }).notNull(),
