@@ -71,20 +71,32 @@ class FormFieldService {
 
     public async reorderFields(payload: ReorderFieldsInputType) {
         const {formId, fieldIds} = reorderFieldsInput.parse(payload);
-        // Build a single UPDATE … CASE statement so all indices change atomically,
-        // avoiding UNIQUE(form_id, index) conflicts from concurrent row-level updates.
-        // All IDs are Zod-validated UUIDs; use sql`` for parameterised safety.
-        const caseParts = fieldIds.map((fieldId, position) =>
-            sql`WHEN id = ${fieldId} THEN ${(position + 1).toFixed(2)}`
-        );
+        // Use a transaction with two passes to avoid UNIQUE(form_id, index) conflicts.
+        // Pass 1: set indices to negative temporaries (no collision possible).
+        // Pass 2: set final positive indices + updated_at.
         const idList = fieldIds.map((id) => sql`${id}`);
-        await db.execute(sql`
-            UPDATE form_fields
-            SET "index" = CASE ${sql.join(caseParts, sql` `)} END,
-                updated_at = NOW()
-            WHERE form_id = ${formId}
-              AND id IN (${sql.join(idList, sql`, `)})
-        `);
+        const inClause = sql.join(idList, sql`, `);
+
+        const tempParts = fieldIds.map((fieldId, i) =>
+            sql`WHEN id = ${fieldId} THEN ${sql.raw((-1 * (i + 1)).toFixed(2))}::numeric`
+        );
+        const finalParts = fieldIds.map((fieldId, i) =>
+            sql`WHEN id = ${fieldId} THEN ${sql.raw((i + 1).toFixed(2))}::numeric`
+        );
+
+        await db.transaction(async (tx) => {
+            await tx.execute(sql`
+                UPDATE form_fields
+                SET "index" = CASE ${sql.join(tempParts, sql` `)} END
+                WHERE form_id = ${formId} AND id IN (${inClause})
+            `);
+            await tx.execute(sql`
+                UPDATE form_fields
+                SET "index" = CASE ${sql.join(finalParts, sql` `)} END,
+                    updated_at = NOW()
+                WHERE form_id = ${formId} AND id IN (${inClause})
+            `);
+        });
         return { success: true };
     }
 
