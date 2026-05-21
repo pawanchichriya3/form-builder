@@ -71,13 +71,20 @@ class FormFieldService {
 
     public async reorderFields(payload: ReorderFieldsInputType) {
         const {formId, fieldIds} = reorderFieldsInput.parse(payload);
-        // Update each field's index based on position in the ordered array
-        const updates = fieldIds.map((fieldId, position) =>
-            db.update(formFieldsTable)
-                .set({ index: (position + 1).toFixed(2) })
-                .where(sql`${formFieldsTable.id} = ${fieldId} AND ${formFieldsTable.formId} = ${formId}`)
+        // Build a single UPDATE … CASE statement so all indices change atomically,
+        // avoiding UNIQUE(form_id, index) conflicts from concurrent row-level updates.
+        // All IDs are Zod-validated UUIDs; use sql`` for parameterised safety.
+        const caseParts = fieldIds.map((fieldId, position) =>
+            sql`WHEN id = ${fieldId} THEN ${(position + 1).toFixed(2)}`
         );
-        await Promise.all(updates);
+        const idList = fieldIds.map((id) => sql`${id}`);
+        await db.execute(sql`
+            UPDATE form_fields
+            SET "index" = CASE ${sql.join(caseParts, sql` `)} END,
+                updated_at = NOW()
+            WHERE form_id = ${formId}
+              AND id IN (${sql.join(idList, sql`, `)})
+        `);
         return { success: true };
     }
 
