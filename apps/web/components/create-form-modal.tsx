@@ -1,19 +1,19 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { Loader2, PlusIcon } from "lucide-react"
 
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-} from "~/components/ui/alert-dialog"
-
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -24,74 +24,85 @@ export function CreateFormModal() {
   const [open, setOpen] = React.useState(false)
   const [title, setTitle] = React.useState("")
   const [description, setDescription] = React.useState("")
+  const router = useRouter()
 
   const { createFormAsync, status } = useCreateForm()
+  const isLoading = status === "pending"
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-
     try {
-      await createFormAsync({ title, description })
+      const result = await createFormAsync({ title, description })
       toast.success("Form created")
       setOpen(false)
       setTitle("")
       setDescription("")
+      if (result?.id) router.push(`/dashboard/forms/${result.id}`)
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to create form")
     }
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-primary to-primary/80 shadow-md shadow-primary/15 hover:shadow-primary/25 transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" className="size-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          New Form
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="h-9 gap-2 font-medium shadow-sm">
+          <PlusIcon className="size-4" />
+          New form
         </Button>
-      </AlertDialogTrigger>
+      </DialogTrigger>
 
-      <AlertDialogContent className="border-border/60 shadow-xl">
-        <form id="create-form" onSubmit={onSubmit}>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold tracking-tight">Create a new form</AlertDialogTitle>
-            <AlertDialogDescription>
-              Give your form a title and optional description to get started.
-            </AlertDialogDescription>
+      <DialogContent className="sm:max-w-md">
+        <form onSubmit={onSubmit}>
+          <DialogHeader>
+            <DialogTitle>Create a new form</DialogTitle>
+            <DialogDescription>
+              Give your form a clear name. You can add fields after.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="mt-4 grid gap-2">
-              <div>
-                <Label htmlFor="form-title">Title</Label>
-                <Input
-                  id="form-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="form-description">Description</Label>
-                <Textarea
-                  id="form-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
+          <div className="mt-5 grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="form-title" className="text-xs font-medium text-muted-foreground">
+                Title
+              </Label>
+              <Input
+                id="form-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Customer onboarding survey"
+                required
+                autoFocus
+                className="h-10"
+              />
             </div>
-          </AlertDialogHeader>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel asChild>
-              <Button variant="outline">Cancel</Button>
-            </AlertDialogCancel>
+            <div className="grid gap-2">
+              <Label htmlFor="form-description" className="text-xs font-medium text-muted-foreground">
+                Description <span className="text-muted-foreground/60">(optional)</span>
+              </Label>
+              <Textarea
+                id="form-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What's this form for?"
+                rows={3}
+              />
+            </div>
+          </div>
 
-            <Button type="submit" form="create-form" disabled={status === "loading"} className="bg-gradient-to-r from-primary to-primary/80">
-              {status === "loading" ? "Creating..." : "Create Form"}
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
             </Button>
-          </AlertDialogFooter>
+            <Button type="submit" disabled={isLoading} className="gap-2">
+              {isLoading && <Loader2 className="size-4 animate-spin" />}
+              {isLoading ? "Creating…" : "Create form"}
+            </Button>
+          </DialogFooter>
         </form>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   )
 }
 

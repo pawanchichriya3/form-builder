@@ -3,14 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─────────────────────────────────────────────────────────
+   Design Tokens — Summit Forms 2.0
+   Modern SaaS aesthetic (Linear / Vercel / Stripe lineage)
+   ───────────────────────────────────────────────────────── */
 @theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -26,6 +33,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -44,113 +53,233 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* ───── Mountains Theme – Light ───── */
+/* ─────────── Light ─────────── */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.975 0.005 250);
-  --foreground: oklch(0.16 0.025 255);
-  --card: oklch(0.993 0.003 250);
-  --card-foreground: oklch(0.16 0.025 255);
-  --popover: oklch(0.993 0.003 250);
-  --popover-foreground: oklch(0.16 0.025 255);
-  --primary: oklch(0.37 0.06 255);
-  --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.935 0.012 250);
-  --secondary-foreground: oklch(0.25 0.035 255);
-  --muted: oklch(0.935 0.01 250);
-  --muted-foreground: oklch(0.50 0.02 255);
-  --accent: oklch(0.92 0.018 185);
-  --accent-foreground: oklch(0.22 0.035 255);
-  --destructive: oklch(0.55 0.22 27);
-  --border: oklch(0.895 0.012 250);
-  --input: oklch(0.895 0.012 250);
-  --ring: oklch(0.52 0.10 250);
-  --chart-1: oklch(0.58 0.14 250);
-  --chart-2: oklch(0.62 0.14 165);
-  --chart-3: oklch(0.72 0.15 75);
-  --chart-4: oklch(0.58 0.16 310);
-  --chart-5: oklch(0.62 0.17 30);
-  --sidebar: oklch(0.21 0.04 255);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.68 0.12 230);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.27 0.04 255);
-  --sidebar-accent-foreground: oklch(0.92 0.01 250);
-  --sidebar-border: oklch(0.30 0.04 255);
-  --sidebar-ring: oklch(0.52 0.10 250);
+  --radius: 0.625rem;
+
+  --background: oklch(0.995 0.002 270);
+  --foreground: oklch(0.18 0.015 270);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.015 270);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.015 270);
+
+  --primary: oklch(0.50 0.20 275);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.965 0.003 270);
+  --secondary-foreground: oklch(0.22 0.015 270);
+  --muted: oklch(0.965 0.003 270);
+  --muted-foreground: oklch(0.50 0.013 270);
+  --accent: oklch(0.96 0.012 275);
+  --accent-foreground: oklch(0.25 0.05 275);
+
+  --destructive: oklch(0.58 0.21 25);
+  --success: oklch(0.62 0.16 155);
+  --warning: oklch(0.74 0.16 80);
+
+  --border: oklch(0.92 0.005 270);
+  --input: oklch(0.92 0.005 270);
+  --ring: oklch(0.50 0.20 275);
+
+  --chart-1: oklch(0.55 0.20 275);
+  --chart-2: oklch(0.65 0.16 165);
+  --chart-3: oklch(0.72 0.16 75);
+  --chart-4: oklch(0.62 0.20 320);
+  --chart-5: oklch(0.65 0.20 25);
+
+  --sidebar: oklch(0.985 0.003 270);
+  --sidebar-foreground: oklch(0.30 0.015 270);
+  --sidebar-primary: oklch(0.50 0.20 275);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.008 275);
+  --sidebar-accent-foreground: oklch(0.22 0.020 275);
+  --sidebar-border: oklch(0.92 0.005 270);
+  --sidebar-ring: oklch(0.50 0.20 275);
 }
 
-/* ───── Mountains Theme – Dark (Twilight) ───── */
+/* ─────────── Dark ─────────── */
 .dark {
-  --background: oklch(0.135 0.025 260);
-  --foreground: oklch(0.93 0.01 250);
-  --card: oklch(0.18 0.03 260);
-  --card-foreground: oklch(0.93 0.01 250);
-  --popover: oklch(0.18 0.03 260);
-  --popover-foreground: oklch(0.93 0.01 250);
-  --primary: oklch(0.68 0.12 230);
-  --primary-foreground: oklch(0.13 0.03 260);
-  --secondary: oklch(0.22 0.03 260);
-  --secondary-foreground: oklch(0.90 0.01 250);
-  --muted: oklch(0.22 0.03 260);
-  --muted-foreground: oklch(0.60 0.02 250);
-  --accent: oklch(0.26 0.04 185);
-  --accent-foreground: oklch(0.90 0.01 250);
+  --background: oklch(0.135 0.012 270);
+  --foreground: oklch(0.96 0.005 270);
+  --card: oklch(0.165 0.014 270);
+  --card-foreground: oklch(0.96 0.005 270);
+  --popover: oklch(0.165 0.014 270);
+  --popover-foreground: oklch(0.96 0.005 270);
+
+  --primary: oklch(0.70 0.18 275);
+  --primary-foreground: oklch(0.13 0.02 275);
+
+  --secondary: oklch(0.22 0.014 270);
+  --secondary-foreground: oklch(0.94 0.005 270);
+  --muted: oklch(0.22 0.014 270);
+  --muted-foreground: oklch(0.65 0.012 270);
+  --accent: oklch(0.24 0.025 275);
+  --accent-foreground: oklch(0.92 0.005 270);
+
   --destructive: oklch(0.65 0.20 25);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.52 0.09 250);
-  --chart-1: oklch(0.62 0.14 230);
-  --chart-2: oklch(0.62 0.14 165);
-  --chart-3: oklch(0.72 0.15 75);
-  --chart-4: oklch(0.58 0.18 305);
-  --chart-5: oklch(0.62 0.17 30);
-  --sidebar: oklch(0.11 0.035 260);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.62 0.14 230);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.18 0.04 260);
-  --sidebar-accent-foreground: oklch(0.90 0.01 250);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.52 0.09 250);
+  --success: oklch(0.72 0.16 155);
+  --warning: oklch(0.78 0.16 80);
+
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.70 0.18 275);
+
+  --chart-1: oklch(0.70 0.18 275);
+  --chart-2: oklch(0.72 0.16 165);
+  --chart-3: oklch(0.78 0.16 75);
+  --chart-4: oklch(0.68 0.20 320);
+  --chart-5: oklch(0.72 0.20 25);
+
+  --sidebar: oklch(0.155 0.014 270);
+  --sidebar-foreground: oklch(0.85 0.008 270);
+  --sidebar-primary: oklch(0.70 0.18 275);
+  --sidebar-primary-foreground: oklch(0.13 0.02 275);
+  --sidebar-accent: oklch(0.22 0.018 275);
+  --sidebar-accent-foreground: oklch(0.92 0.005 270);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.70 0.18 275);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/40;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  }
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 25%, transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--muted-foreground) 25%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+    background-clip: padding-box;
+    border: 2px solid transparent;
   }
 }
 
-/* ───── Mountain decorative utilities ───── */
-.mountain-bg {
-  background:
-    linear-gradient(180deg, oklch(0.25 0.05 255) 0%, oklch(0.18 0.04 260) 40%, oklch(0.13 0.03 265) 100%);
-  position: relative;
-  overflow: hidden;
+/* ─────────────────────────────────────────────────────────
+   Utilities
+   ───────────────────────────────────────────────────────── */
+
+/* Soft mesh-gradient backdrop for marketing/auth surfaces */
+.mesh {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 12% 18%, color-mix(in oklch, var(--primary) 18%, transparent) 0px, transparent 50%),
+    radial-gradient(at 85% 8%, color-mix(in oklch, var(--chart-2) 14%, transparent) 0px, transparent 50%),
+    radial-gradient(at 70% 92%, color-mix(in oklch, var(--chart-4) 16%, transparent) 0px, transparent 55%),
+    radial-gradient(at 5% 90%, color-mix(in oklch, var(--chart-3) 12%, transparent) 0px, transparent 50%);
 }
 
-.mountain-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 120% 60% at 20% 80%, oklch(0.22 0.06 250 / 40%) 0%, transparent 70%),
-    radial-gradient(ellipse 100% 50% at 80% 90%, oklch(0.20 0.04 270 / 30%) 0%, transparent 60%);
-  pointer-events: none;
+/* Subtle dotted grid */
+.dotted-grid {
+  background-image:
+    radial-gradient(circle, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-.mountain-glass {
-  background: oklch(1 0 0 / 8%);
-  backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid oklch(1 0 0 / 12%);
+/* Subtle line grid */
+.line-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
-.mountain-gradient-text {
-  background: linear-gradient(135deg, oklch(0.75 0.12 230), oklch(0.68 0.15 200), oklch(0.60 0.12 260));
+/* Translucent surface for floating panels */
+.glass {
+  background: color-mix(in oklch, var(--card) 70%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--border);
+}
+
+/* Brand gradient text */
+.brand-text {
+  background: linear-gradient(135deg, var(--chart-1), var(--chart-4) 60%, var(--chart-2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
+}
+
+/* Soft container shadow (Stripe-like) */
+.elevate {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 4%),
+    0 1px 3px 0 rgb(0 0 0 / 5%);
+}
+.elevate-lg {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 4%),
+    0 8px 24px -6px rgb(0 0 0 / 8%);
+}
+.dark .elevate {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 30%),
+    0 1px 3px 0 rgb(0 0 0 / 25%);
+}
+.dark .elevate-lg {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 30%),
+    0 12px 28px -8px rgb(0 0 0 / 45%);
+}
+
+/* Hover micro-lift */
+.lift {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms ease, border-color 200ms ease;
+}
+.lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Page mount animation */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Shimmer (loading state) */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--muted) 60%, transparent) 0%,
+    color-mix(in oklch, var(--muted-foreground) 12%, transparent) 50%,
+    color-mix(in oklch, var(--muted) 60%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Hairline divider with fade-out ends */
+.hairline-x {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 15%, var(--border) 85%, transparent);
 }

@@ -1,33 +1,87 @@
+import Link from "next/link"
+import { BrandLockup } from "~/components/brand"
+import { ThemeToggle } from "~/components/theme-toggle"
 import { LoginForm } from "~/components/login-form"
 
-export default function Page() {
+export default function LoginPage() {
   return (
-    <div className="relative flex min-h-svh w-full items-center justify-center overflow-hidden">
-      {/* Mountain background */}
-      <div className="absolute inset-0 mountain-bg">
-        <svg
-          className="absolute bottom-0 left-0 w-full"
-          viewBox="0 0 1440 400"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-        >
-          <path d="M0 400V280L180 180L360 260L540 120L720 200L900 80L1080 160L1260 60L1440 180V400H0Z" fill="oklch(0.16 0.035 260 / 50%)" />
-          <path d="M0 400V320L240 220L480 300L720 160L960 240L1200 140L1440 260V400H0Z" fill="oklch(0.14 0.03 260 / 60%)" />
-          <path d="M0 400V360L300 280L600 340L900 260L1200 320L1440 300V400H0Z" fill="oklch(0.12 0.025 260 / 70%)" />
-        </svg>
-        {/* Stars */}
-        <div className="absolute top-[10%] left-[15%] size-1 rounded-full bg-white/40 animate-pulse" />
-        <div className="absolute top-[8%] left-[45%] size-1.5 rounded-full bg-white/30 animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[15%] left-[75%] size-1 rounded-full bg-white/35 animate-pulse [animation-delay:0.5s]" />
-        <div className="absolute top-[20%] left-[30%] size-0.5 rounded-full bg-white/25 animate-pulse [animation-delay:1.5s]" />
-        <div className="absolute top-[5%] left-[60%] size-1 rounded-full bg-white/20 animate-pulse [animation-delay:2s]" />
-        <div className="absolute top-[12%] left-[88%] size-0.5 rounded-full bg-white/30 animate-pulse [animation-delay:0.8s]" />
+    <div className="relative grid min-h-svh lg:grid-cols-[1.05fr_1fr]">
+      {/* Left — form */}
+      <div className="relative flex flex-col px-6 py-8 md:px-12 lg:px-16">
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Summit Forms home">
+            <BrandLockup size="md" />
+          </Link>
+          <ThemeToggle />
+        </div>
+
+        <div className="flex flex-1 items-center justify-center py-12">
+          <div className="w-full max-w-sm fade-up">
+            <div className="mb-8 space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+              <p className="text-sm text-muted-foreground">
+                Sign in to continue building beautiful forms.
+              </p>
+            </div>
+            <LoginForm />
+            <p className="mt-8 text-center text-xs text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
+                Create one
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Summit Forms · Forms, refined.
+        </p>
       </div>
-      {/* Form card */}
-      <div className="relative z-10 w-full max-w-sm p-6">
-        <LoginForm />
-      </div>
+
+      {/* Right — marketing panel */}
+      <aside className="relative hidden overflow-hidden border-l border-border bg-muted/30 lg:block">
+        <div className="absolute inset-0 mesh" aria-hidden />
+        <div className="absolute inset-0 dotted-grid opacity-60" aria-hidden />
+        <div className="relative z-10 flex h-full flex-col justify-between p-12">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-success" />
+            All systems operational
+          </div>
+
+          <div className="space-y-6">
+            <blockquote className="space-y-4">
+              <p className="text-2xl font-medium leading-relaxed tracking-tight text-foreground">
+                &ldquo;Summit Forms replaced three of our tools. The end-to-end type safety alone saved us a sprint.&rdquo;
+              </p>
+              <footer className="flex items-center gap-3">
+                <div className="grid size-9 place-items-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                  AR
+                </div>
+                <div className="text-sm">
+                  <div className="font-medium">Avery Ramos</div>
+                  <div className="text-muted-foreground">Engineering Lead, Anchor Labs</div>
+                </div>
+              </footer>
+            </blockquote>
+
+            <div className="hairline-x" />
+
+            <ul className="grid grid-cols-2 gap-4 text-sm">
+              {[
+                { k: "Type-safe", v: "DB → UI" },
+                { k: "p95 latency", v: "< 80ms" },
+                { k: "Uptime", v: "99.98%" },
+                { k: "Schema-on-read", v: "JSONB" },
+              ].map((s) => (
+                <li key={s.k} className="rounded-lg border border-border/70 bg-card/60 p-3 backdrop-blur-sm">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">{s.k}</div>
+                  <div className="mt-1 font-medium tabular-nums">{s.v}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </aside>
     </div>
   )
 }

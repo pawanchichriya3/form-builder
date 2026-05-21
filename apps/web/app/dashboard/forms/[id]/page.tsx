@@ -4,16 +4,37 @@ import * as React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { toast } from "sonner"
-import { Trash2Icon, PlusIcon } from "lucide-react"
+import {
+  Trash2Icon,
+  PlusIcon,
+  ArrowLeftIcon,
+  CopyIcon,
+  ExternalLinkIcon,
+  BarChart3Icon,
+  Type as TypeIcon,
+  Hash as HashIcon,
+  Mail as MailIcon,
+  Lock as LockIcon,
+  ToggleLeft as ToggleIcon,
+  Loader2,
+} from "lucide-react"
 
 import { useListForms } from "~/hooks/api/form"
-import { useGetFields, useCreateField, useUpdateField, useDeleteField } from "~/hooks/api/form-field"
+import {
+  useGetFields,
+  useCreateField,
+  useUpdateField,
+  useDeleteField,
+} from "~/hooks/api/form-field"
+
+import { AppSidebar } from "~/components/app-sidebar"
+import { SiteHeader } from "~/components/site-header"
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
 import { Label } from "~/components/ui/label"
 import { Button } from "~/components/ui/button"
 import { Switch } from "~/components/ui/switch"
-import { Separator } from "~/components/ui/separator"
 import {
   Select,
   SelectContent,
@@ -22,17 +43,26 @@ import {
   SelectValue,
 } from "~/components/ui/select"
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-} from "~/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog"
+import { cn } from "~/lib/utils"
 
 const FIELD_TYPES = ["TEXT", "NUMBER", "EMAIL", "PASSWORD", "YES_NO"] as const
+type FieldType = (typeof FIELD_TYPES)[number]
+
+const FIELD_TYPE_META: Record<FieldType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  TEXT: { label: "Text", icon: TypeIcon },
+  NUMBER: { label: "Number", icon: HashIcon },
+  EMAIL: { label: "Email", icon: MailIcon },
+  PASSWORD: { label: "Password", icon: LockIcon },
+  YES_NO: { label: "Yes / No", icon: ToggleIcon },
+}
 
 export default function EditFormPage() {
   const params = useParams()
@@ -45,12 +75,14 @@ export default function EditFormPage() {
 
   const [addOpen, setAddOpen] = React.useState(false)
   const [newLabel, setNewLabel] = React.useState("")
-  const [newType, setNewType] = React.useState<(typeof FIELD_TYPES)[number]>("TEXT")
+  const [newType, setNewType] = React.useState<FieldType>("TEXT")
   const [newRequired, setNewRequired] = React.useState(false)
   const [newDescription, setNewDescription] = React.useState("")
   const [newPlaceholder, setNewPlaceholder] = React.useState("")
 
   const form = forms?.find((f: any) => f.id === id)
+  const publicUrl =
+    typeof window !== "undefined" && id ? `${window.location.origin}/form/${id}` : ""
 
   function resetAddForm() {
     setNewLabel("")
@@ -93,229 +125,356 @@ export default function EditFormPage() {
     fieldId: string,
     updates: {
       label?: string
-      type?: (typeof FIELD_TYPES)[number]
+      type?: FieldType
       isRequired?: boolean
       description?: string
       placeholder?: string
-    }
+    },
   ) {
     try {
       await updateFieldAsync({ fieldId, ...updates })
-      toast.success("Field updated")
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to update field")
     }
   }
 
-  if (isLoading) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>
-  if (!form) return (
-    <div className="p-6">
-      <p className="text-muted-foreground">Form not found.</p>
-      <Link href="/dashboard/forms" className="text-primary hover:text-primary/80 underline-offset-4 hover:underline">Back to forms</Link>
-    </div>
-  )
+  function copyShareLink() {
+    if (!publicUrl) return
+    navigator.clipboard.writeText(publicUrl).then(() => toast.success("Link copied"))
+  }
 
   return (
-    <div className="p-6 lg:p-8">
-      <div className="mb-6">
-        <Link href="/dashboard/forms" className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 inline-block">← Back to forms</Link>
-        <h1 className="text-2xl font-bold tracking-tight">Edit Form</h1>
-      </div>
-
-      <div className="grid gap-5 max-w-2xl">
-        <div className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm p-5 shadow-sm">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Title</Label>
-              <h3 className="text-lg font-semibold mt-1">{form.title}</h3>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 64)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col py-6 md:py-8">
+          {isLoading ? (
+            <div className="flex items-center justify-center px-4 py-16 text-sm text-muted-foreground">
+              <Loader2 className="mr-2 size-4 animate-spin" /> Loading form…
             </div>
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Description</Label>
-              <h3 className="text-sm text-muted-foreground mt-1">{form.description || "—"}</h3>
+          ) : !form ? (
+            <div className="px-4 py-16 lg:px-6">
+              <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
+                <p className="text-sm text-muted-foreground">Form not found.</p>
+                <Link
+                  href="/dashboard/forms"
+                  className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+                >
+                  Back to forms
+                </Link>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <Separator className="opacity-60" />
-
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold tracking-tight">Fields</h2>
-
-          <AlertDialog open={addOpen} onOpenChange={setAddOpen}>
-            <AlertDialogTrigger asChild>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 shadow-sm shadow-primary/15 hover:shadow-primary/25 transition-all">
-                <PlusIcon className="size-4 mr-1" /> Add Field
-              </Button>
-            </AlertDialogTrigger>
-
-            <AlertDialogContent className="border-border/60 shadow-xl">
-              <form id="add-field-form" onSubmit={handleAddField}>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="font-bold tracking-tight">Add a new field</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Configure the field properties below.
-                  </AlertDialogDescription>
-
-                  <div className="mt-4 grid gap-3">
-                    <div>
-                      <Label htmlFor="field-label">Label</Label>
-                      <Input
-                        id="field-label"
-                        value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="field-type">Type</Label>
-                      <Select value={newType} onValueChange={(v) => setNewType(v as typeof newType)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FIELD_TYPES.map((t) => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="field-placeholder">Placeholder</Label>
-                      <Input
-                        id="field-placeholder"
-                        value={newPlaceholder}
-                        onChange={(e) => setNewPlaceholder(e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="field-description">Description</Label>
-                      <Textarea
-                        id="field-description"
-                        value={newDescription}
-                        onChange={(e) => setNewDescription(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="field-required"
-                        checked={newRequired}
-                        onCheckedChange={setNewRequired}
-                      />
-                      <Label htmlFor="field-required">Required</Label>
-                    </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div className="flex flex-col gap-4 px-4 lg:px-6 fade-up">
+                <Link
+                  href="/dashboard/forms"
+                  className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <ArrowLeftIcon className="size-3.5" /> All forms
+                </Link>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="min-w-0">
+                    <h1 className="truncate text-2xl font-semibold tracking-tight">{form.title}</h1>
+                    {form.description && (
+                      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{form.description}</p>
+                    )}
                   </div>
-                </AlertDialogHeader>
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="outline" size="sm" className="h-9 gap-2">
+                      <Link href={`/dashboard/forms/${id}/submissions`}>
+                        <BarChart3Icon className="size-4" />
+                        Submissions
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="h-9 gap-2">
+                      <a href={`/form/${id}`} target="_blank" rel="noreferrer">
+                        <ExternalLinkIcon className="size-4" />
+                        Preview
+                      </a>
+                    </Button>
+                  </div>
+                </div>
 
-                <AlertDialogFooter>
-                  <AlertDialogCancel asChild>
-                    <Button variant="outline" type="button">Cancel</Button>
-                  </AlertDialogCancel>
-                  <Button type="submit" form="add-field-form" disabled={createStatus === "pending"} className="bg-gradient-to-r from-primary to-primary/80">
-                    {createStatus === "pending" ? "Adding..." : "Add Field"}
+                {/* Share link bar */}
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-1.5">
+                  <span className="grid size-7 place-items-center rounded bg-card text-muted-foreground">
+                    <ExternalLinkIcon className="size-3.5" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">
+                    {publicUrl || "—"}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1.5 text-xs"
+                    onClick={copyShareLink}
+                  >
+                    <CopyIcon className="size-3.5" />
+                    Copy
                   </Button>
-                </AlertDialogFooter>
-              </form>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {fieldsLoading && <p className="text-muted-foreground text-sm py-4 text-center">Loading fields…</p>}
-
-        {fields && fields.length === 0 && (
-          <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="size-10 mx-auto text-muted-foreground/40 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
-            <p className="text-muted-foreground text-sm">No fields yet. Add your first field to get started.</p>
-          </div>
-        )}
-
-        {fields?.map((field: any) => (
-          <div key={field.id} className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm p-4 grid gap-3 shadow-sm hover:shadow-md hover:shadow-primary/5 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">{field.label}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-primary/80 rounded-full bg-primary/8 px-2.5 py-0.5">
-                  {field.type}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDeleteField(field.id)}
-                >
-                  <Trash2Icon className="size-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div>
-                <Label className="text-xs">Label</Label>
-                <Input
-                  defaultValue={field.label}
-                  onBlur={(e) => {
-                    if (e.target.value !== field.label) {
-                      handleUpdateField(field.id, { label: e.target.value })
-                    }
-                  }}
-                />
+                </div>
               </div>
 
-              <div>
-                <Label className="text-xs">Type</Label>
-                <Select
-                  defaultValue={field.type}
-                  onValueChange={(v) => handleUpdateField(field.id, { type: v as typeof newType })}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FIELD_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+              {/* Fields */}
+              <div className="mt-8 px-4 lg:px-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold tracking-tight">Fields</h2>
+                    <p className="text-xs text-muted-foreground">
+                      Changes save automatically when you leave a field.
+                    </p>
+                  </div>
+
+                  <Dialog open={addOpen} onOpenChange={setAddOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="h-9 gap-2 font-medium">
+                        <PlusIcon className="size-4" />
+                        Add field
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <form onSubmit={handleAddField}>
+                        <DialogHeader>
+                          <DialogTitle>Add a new field</DialogTitle>
+                          <DialogDescription>
+                            Configure the field. You can refine it later.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="mt-5 grid gap-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="field-label" className="text-xs font-medium text-muted-foreground">
+                              Label
+                            </Label>
+                            <Input
+                              id="field-label"
+                              value={newLabel}
+                              onChange={(e) => setNewLabel(e.target.value)}
+                              required
+                              autoFocus
+                              className="h-10"
+                            />
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label className="text-xs font-medium text-muted-foreground">Type</Label>
+                            <Select value={newType} onValueChange={(v) => setNewType(v as FieldType)}>
+                              <SelectTrigger className="h-10 w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FIELD_TYPES.map((t) => {
+                                  const Icon = FIELD_TYPE_META[t].icon
+                                  return (
+                                    <SelectItem key={t} value={t}>
+                                      <span className="flex items-center gap-2">
+                                        <Icon className="size-3.5 text-muted-foreground" />
+                                        {FIELD_TYPE_META[t].label}
+                                      </span>
+                                    </SelectItem>
+                                  )
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label htmlFor="field-placeholder" className="text-xs font-medium text-muted-foreground">
+                              Placeholder
+                            </Label>
+                            <Input
+                              id="field-placeholder"
+                              value={newPlaceholder}
+                              onChange={(e) => setNewPlaceholder(e.target.value)}
+                              className="h-10"
+                            />
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label htmlFor="field-description" className="text-xs font-medium text-muted-foreground">
+                              Helper text
+                            </Label>
+                            <Textarea
+                              id="field-description"
+                              value={newDescription}
+                              onChange={(e) => setNewDescription(e.target.value)}
+                              rows={2}
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+                            <div>
+                              <Label className="text-sm">Required</Label>
+                              <p className="text-xs text-muted-foreground">Block submission if empty.</p>
+                            </div>
+                            <Switch checked={newRequired} onCheckedChange={setNewRequired} />
+                          </div>
+                        </div>
+
+                        <DialogFooter className="mt-6">
+                          <Button type="button" variant="ghost" onClick={() => setAddOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" disabled={createStatus === "pending"} className="gap-2">
+                            {createStatus === "pending" && <Loader2 className="size-4 animate-spin" />}
+                            {createStatus === "pending" ? "Adding…" : "Add field"}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {fieldsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-24 rounded-xl border border-border bg-card shimmer" />
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  </div>
+                ) : !fields || fields.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
+                    <div className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <PlusIcon className="size-5" />
+                    </div>
+                    <h3 className="mt-4 text-sm font-medium">No fields yet</h3>
+                    <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
+                      Add your first field — text, number, email, password, or yes/no.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="space-y-3">
+                    {fields.map((field: any, idx: number) => {
+                      const Icon = FIELD_TYPE_META[field.type as FieldType]?.icon ?? TypeIcon
+                      return (
+                        <li
+                          key={field.id}
+                          className={cn("group rounded-xl border border-border bg-card p-5 elevate lift")}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+                                <Icon className="size-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate text-sm font-medium tracking-tight">{field.label}</span>
+                                  {field.isRequired && (
+                                    <span className="rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+                                      required
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-0.5 text-xs text-muted-foreground">
+                                  Field {idx + 1} · {FIELD_TYPE_META[field.type as FieldType]?.label}
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => handleDeleteField(field.id)}
+                              aria-label="Delete field"
+                            >
+                              <Trash2Icon className="size-4" />
+                            </Button>
+                          </div>
 
-              <div>
-                <Label className="text-xs">Placeholder</Label>
-                <Input
-                  defaultValue={field.placeholder ?? ""}
-                  onBlur={(e) => {
-                    if (e.target.value !== (field.placeholder ?? "")) {
-                      handleUpdateField(field.id, { placeholder: e.target.value })
-                    }
-                  }}
-                />
-              </div>
+                          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-1.5">
+                              <Label className="text-xs font-medium text-muted-foreground">Label</Label>
+                              <Input
+                                defaultValue={field.label}
+                                onBlur={(e) => {
+                                  if (e.target.value !== field.label) {
+                                    handleUpdateField(field.id, { label: e.target.value })
+                                  }
+                                }}
+                              />
+                            </div>
 
-              <div>
-                <Label className="text-xs">Description</Label>
-                <Input
-                  defaultValue={field.description ?? ""}
-                  onBlur={(e) => {
-                    if (e.target.value !== (field.description ?? "")) {
-                      handleUpdateField(field.id, { description: e.target.value })
-                    }
-                  }}
-                />
-              </div>
-            </div>
+                            <div className="grid gap-1.5">
+                              <Label className="text-xs font-medium text-muted-foreground">Type</Label>
+                              <Select
+                                defaultValue={field.type}
+                                onValueChange={(v) => handleUpdateField(field.id, { type: v as FieldType })}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {FIELD_TYPES.map((t) => {
+                                    const I = FIELD_TYPE_META[t].icon
+                                    return (
+                                      <SelectItem key={t} value={t}>
+                                        <span className="flex items-center gap-2">
+                                          <I className="size-3.5 text-muted-foreground" />
+                                          {FIELD_TYPE_META[t].label}
+                                        </span>
+                                      </SelectItem>
+                                    )
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={field.isRequired}
-                onCheckedChange={(checked) => handleUpdateField(field.id, { isRequired: checked })}
-              />
-              <Label className="text-xs">Required</Label>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+                            <div className="grid gap-1.5">
+                              <Label className="text-xs font-medium text-muted-foreground">Placeholder</Label>
+                              <Input
+                                defaultValue={field.placeholder ?? ""}
+                                onBlur={(e) => {
+                                  if (e.target.value !== (field.placeholder ?? "")) {
+                                    handleUpdateField(field.id, { placeholder: e.target.value })
+                                  }
+                                }}
+                              />
+                            </div>
+
+                            <div className="grid gap-1.5">
+                              <Label className="text-xs font-medium text-muted-foreground">Helper text</Label>
+                              <Input
+                                defaultValue={field.description ?? ""}
+                                onBlur={(e) => {
+                                  if (e.target.value !== (field.description ?? "")) {
+                                    handleUpdateField(field.id, { description: e.target.value })
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="mt-5 flex items-center justify-between rounded-lg border border-border bg-muted/40 p-3">
+                            <div>
+                              <Label className="text-sm">Required</Label>
+                              <p className="text-xs text-muted-foreground">Block submission if empty.</p>
+                            </div>
+                            <Switch
+                              checked={field.isRequired}
+                              onCheckedChange={(checked) =>
+                                handleUpdateField(field.id, { isRequired: checked })
+                              }
+                            />
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

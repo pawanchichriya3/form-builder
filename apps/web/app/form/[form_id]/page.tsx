@@ -2,16 +2,18 @@
 
 import * as React from "react"
 import { useParams } from "next/navigation"
-
 import { toast } from "sonner"
+import { CheckIcon, Loader2 } from "lucide-react"
 
 import { useGetFormById } from "~/hooks/api/form"
 import { useSubmitForm } from "~/hooks/api/form-submission"
+
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Button } from "~/components/ui/button"
 import { Switch } from "~/components/ui/switch"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { BrandLockup } from "~/components/brand"
+import { ThemeToggle } from "~/components/theme-toggle"
 
 export default function PublicFormPage() {
   const params = useParams()
@@ -42,98 +44,140 @@ export default function PublicFormPage() {
     }
   }
 
-  if (isLoading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Loading…</div>
-  if (isError || !form) return <div className="flex items-center justify-center min-h-screen text-destructive">Form not found.</div>
+  if (isLoading) {
+    return (
+      <Shell>
+        <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
+          <Loader2 className="mr-2 size-4 animate-spin" /> Loading form…
+        </div>
+      </Shell>
+    )
+  }
+
+  if (isError || !form) {
+    return (
+      <Shell>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <h2 className="text-base font-semibold">Form not found</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The form may have been deleted or the link is incorrect.
+          </p>
+        </div>
+      </Shell>
+    )
+  }
 
   if (submitted) {
     return (
-      <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
-        <div className="absolute inset-0 mountain-bg">
-          <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 300" fill="none" preserveAspectRatio="none">
-            <path d="M0 300V220L240 140L480 200L720 80L960 160L1200 60L1440 140V300H0Z" fill="oklch(0.16 0.035 260 / 50%)" />
-            <path d="M0 300V260L300 190L600 250L900 170L1200 230L1440 210V300H0Z" fill="oklch(0.12 0.025 260 / 70%)" />
-          </svg>
+      <Shell>
+        <div className="rounded-2xl border border-border bg-card p-10 text-center elevate-lg fade-up">
+          <div className="mx-auto grid size-14 place-items-center rounded-full bg-success/15 text-success">
+            <CheckIcon className="size-7" />
+          </div>
+          <h2 className="mt-5 text-xl font-semibold tracking-tight">Thank you!</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your response has been recorded.
+          </p>
         </div>
-        <Card className="relative z-10 w-full max-w-lg mountain-glass border-white/10 shadow-2xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-chart-2 to-chart-2/70 shadow-lg shadow-chart-2/20">
-              <svg xmlns="http://www.w3.org/2000/svg" className="size-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </div>
-            <CardTitle className="text-xl text-white">Thank you!</CardTitle>
-            <CardDescription className="text-white/60">Your response has been recorded successfully.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      </Shell>
     )
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
-      {/* Mountain background */}
-      <div className="absolute inset-0 mountain-bg">
-        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 300" fill="none" preserveAspectRatio="none">
-          <path d="M0 300V220L240 140L480 200L720 80L960 160L1200 60L1440 140V300H0Z" fill="oklch(0.16 0.035 260 / 50%)" />
-          <path d="M0 300V260L300 190L600 250L900 170L1200 230L1440 210V300H0Z" fill="oklch(0.12 0.025 260 / 70%)" />
-        </svg>
-        <div className="absolute top-[10%] left-[15%] size-1 rounded-full bg-white/40 animate-pulse" />
-        <div className="absolute top-[8%] left-[50%] size-1.5 rounded-full bg-white/30 animate-pulse [animation-delay:1s]" />
-        <div className="absolute top-[15%] left-[80%] size-1 rounded-full bg-white/35 animate-pulse [animation-delay:0.5s]" />
-      </div>
-      <Card className="relative z-10 w-full max-w-lg mountain-glass border-white/10 shadow-2xl">
-        <CardHeader>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
-              <svg xmlns="http://www.w3.org/2000/svg" className="size-4 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
-            </div>
-            <span className="text-xs font-medium text-white/40 uppercase tracking-wider">Summit Forms</span>
-          </div>
-          <CardTitle className="text-xl text-white">{form.title}</CardTitle>
-          {form.description && <CardDescription className="text-white/60">{form.description}</CardDescription>}
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-4">
+    <Shell>
+      <div className="rounded-2xl border border-border bg-card elevate-lg fade-up">
+        {/* Form header */}
+        <div className="border-b border-border px-6 py-5 sm:px-8">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary">Form</p>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">{form.title}</h1>
+          {form.description && (
+            <p className="mt-2 text-sm text-muted-foreground">{form.description}</p>
+          )}
+        </div>
+
+        {/* Fields */}
+        <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-8 sm:py-8">
+          <div className="grid gap-6">
             {form.fields.map((field: any) => (
-              <div key={field.id} className="grid gap-1.5">
-                <Label htmlFor={field.id} className="text-white/90">
+              <div key={field.id} className="grid gap-2">
+                <Label htmlFor={field.id} className="text-sm font-medium">
                   {field.label}
-                  {field.isRequired && <span className="text-destructive ml-1">*</span>}
+                  {field.isRequired && <span className="ml-1 text-destructive">*</span>}
                 </Label>
 
                 {field.description && (
-                  <p className="text-xs text-white/40">{field.description}</p>
+                  <p className="text-xs text-muted-foreground">{field.description}</p>
                 )}
 
                 {field.type === "YES_NO" ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                    <span className="text-sm text-muted-foreground">
+                      {values[field.id] ? "Yes" : "No"}
+                    </span>
                     <Switch
                       id={field.id}
                       checked={!!values[field.id]}
                       onCheckedChange={(checked) => handleChange(field.id, checked)}
                     />
-                    <span className="text-sm text-white/60">
-                      {values[field.id] ? "Yes" : "No"}
-                    </span>
                   </div>
                 ) : (
                   <Input
                     id={field.id}
-                    type={field.type === "NUMBER" ? "number" : field.type === "EMAIL" ? "email" : field.type === "PASSWORD" ? "password" : "text"}
+                    type={
+                      field.type === "NUMBER"
+                        ? "number"
+                        : field.type === "EMAIL"
+                          ? "email"
+                          : field.type === "PASSWORD"
+                            ? "password"
+                            : "text"
+                    }
                     placeholder={field.placeholder ?? ""}
                     required={field.isRequired}
                     value={(values[field.id] as string) ?? ""}
                     onChange={(e) => handleChange(field.id, e.target.value)}
-                    className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-primary/50"
+                    className="h-10"
                   />
                 )}
               </div>
             ))}
 
-            <Button type="submit" className="mt-2 bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all" disabled={submitStatus === "pending"}>
-              {submitStatus === "pending" ? "Submitting..." : "Submit Response"}
+            <Button
+              type="submit"
+              className="mt-2 h-11 gap-2 text-sm font-medium"
+              disabled={submitStatus === "pending"}
+            >
+              {submitStatus === "pending" && <Loader2 className="size-4 animate-spin" />}
+              {submitStatus === "pending" ? "Submitting…" : "Submit response"}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </form>
+      </div>
+    </Shell>
+  )
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-svh bg-background">
+      <div className="absolute inset-x-0 top-0 h-64 mesh opacity-70" aria-hidden />
+      <div className="relative mx-auto flex min-h-svh w-full max-w-2xl flex-col px-4 py-8 sm:px-6">
+        <div className="flex items-center justify-between">
+          <BrandLockup size="sm" />
+          <ThemeToggle />
+        </div>
+
+        <div className="flex flex-1 items-start justify-center py-12">
+          <div className="w-full">{children}</div>
+        </div>
+
+        <p className="text-center text-[11px] text-muted-foreground">
+          Powered by{" "}
+          <a href="/" className="font-medium text-foreground hover:underline">
+            Summit Forms
+          </a>
+        </p>
+      </div>
     </div>
   )
 }
