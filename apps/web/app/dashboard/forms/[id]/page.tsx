@@ -107,47 +107,51 @@ export default function EditFormPage() {
     }
   }
 
-  if (isLoading) return <div className="p-6">Loading…</div>
+  if (isLoading) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>
   if (!form) return (
     <div className="p-6">
-      <p>Form not found.</p>
-      <Link href="/dashboard/forms" className="text-primary underline">Back</Link>
+      <p className="text-muted-foreground">Form not found.</p>
+      <Link href="/dashboard/forms" className="text-primary hover:text-primary/80 underline-offset-4 hover:underline">Back to forms</Link>
     </div>
   )
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-semibold">Edit form</h1>
+    <div className="p-6 lg:p-8">
+      <div className="mb-6">
+        <Link href="/dashboard/forms" className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 inline-block">← Back to forms</Link>
+        <h1 className="text-2xl font-bold tracking-tight">Edit Form</h1>
       </div>
 
-      <div className="grid gap-4 max-w-2xl">
-        <div>
-          <Label>Title</Label>
-          <h3>{form.title}</h3>
+      <div className="grid gap-5 max-w-2xl">
+        <div className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm p-5 shadow-sm">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Title</Label>
+              <h3 className="text-lg font-semibold mt-1">{form.title}</h3>
+            </div>
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Description</Label>
+              <h3 className="text-sm text-muted-foreground mt-1">{form.description || "—"}</h3>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <Label>Description</Label>
-          <h3>{form.description}</h3>
-        </div>
-
-        <Separator />
+        <Separator className="opacity-60" />
 
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Fields</h2>
+          <h2 className="text-lg font-bold tracking-tight">Fields</h2>
 
           <AlertDialog open={addOpen} onOpenChange={setAddOpen}>
             <AlertDialogTrigger asChild>
-              <Button variant="secondary" size="sm">
-                <PlusIcon className="size-4 mr-1" /> Add field
+              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 shadow-sm shadow-primary/15 hover:shadow-primary/25 transition-all">
+                <PlusIcon className="size-4 mr-1" /> Add Field
               </Button>
             </AlertDialogTrigger>
 
-            <AlertDialogContent>
+            <AlertDialogContent className="border-border/60 shadow-xl">
               <form id="add-field-form" onSubmit={handleAddField}>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Add a new field</AlertDialogTitle>
+                  <AlertDialogTitle className="font-bold tracking-tight">Add a new field</AlertDialogTitle>
                   <AlertDialogDescription>
                     Configure the field properties below.
                   </AlertDialogDescription>
@@ -210,8 +214,8 @@ export default function EditFormPage() {
                   <AlertDialogCancel asChild>
                     <Button variant="outline" type="button">Cancel</Button>
                   </AlertDialogCancel>
-                  <Button type="submit" form="add-field-form" disabled={createStatus === "pending"}>
-                    {createStatus === "pending" ? "Adding..." : "Add field"}
+                  <Button type="submit" form="add-field-form" disabled={createStatus === "pending"} className="bg-gradient-to-r from-primary to-primary/80">
+                    {createStatus === "pending" ? "Adding..." : "Add Field"}
                   </Button>
                 </AlertDialogFooter>
               </form>
@@ -219,24 +223,27 @@ export default function EditFormPage() {
           </AlertDialog>
         </div>
 
-        {fieldsLoading && <p className="text-muted-foreground text-sm">Loading fields…</p>}
+        {fieldsLoading && <p className="text-muted-foreground text-sm py-4 text-center">Loading fields…</p>}
 
         {fields && fields.length === 0 && (
-          <p className="text-muted-foreground text-sm">No fields yet. Add one above.</p>
+          <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="size-10 mx-auto text-muted-foreground/40 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+            <p className="text-muted-foreground text-sm">No fields yet. Add your first field to get started.</p>
+          </div>
         )}
 
         {fields?.map((field: any) => (
-          <div key={field.id} className="rounded-lg border p-4 grid gap-3">
+          <div key={field.id} className="rounded-xl border border-border/60 bg-card/50 backdrop-blur-sm p-4 grid gap-3 shadow-sm hover:shadow-md hover:shadow-primary/5 transition-all duration-300">
             <div className="flex items-center justify-between">
-              <span className="font-medium">{field.label}</span>
+              <span className="font-semibold">{field.label}</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground rounded bg-muted px-2 py-0.5">
+                <span className="text-xs font-medium text-primary/80 rounded-full bg-primary/8 px-2.5 py-0.5">
                   {field.type}
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 text-destructive"
+                  className="size-8 text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                   onClick={() => handleDeleteField(field.id)}
                 >
                   <Trash2Icon className="size-4" />

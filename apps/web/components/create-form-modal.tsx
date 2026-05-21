@@ -44,15 +44,18 @@ export function CreateFormModal() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="secondary">New form</Button>
+        <Button className="bg-gradient-to-r from-primary to-primary/80 shadow-md shadow-primary/15 hover:shadow-primary/25 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" className="size-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          New Form
+        </Button>
       </AlertDialogTrigger>
 
-      <AlertDialogContent>
+      <AlertDialogContent className="border-border/60 shadow-xl">
         <form id="create-form" onSubmit={onSubmit}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create a new form</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg font-bold tracking-tight">Create a new form</AlertDialogTitle>
             <AlertDialogDescription>
-              Enter a title and optional description for the new form.
+              Give your form a title and optional description to get started.
             </AlertDialogDescription>
 
             <div className="mt-4 grid gap-2">
@@ -82,8 +85,8 @@ export function CreateFormModal() {
               <Button variant="outline">Cancel</Button>
             </AlertDialogCancel>
 
-            <Button type="submit" form="create-form" disabled={status === "loading"}>
-              {status === "loading" ? "Creating..." : "Create"}
+            <Button type="submit" form="create-form" disabled={status === "loading"} className="bg-gradient-to-r from-primary to-primary/80">
+              {status === "loading" ? "Creating..." : "Create Form"}
             </Button>
           </AlertDialogFooter>
         </form>
