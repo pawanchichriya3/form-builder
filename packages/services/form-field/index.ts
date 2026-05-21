@@ -1,6 +1,6 @@
 import {formFieldsTable} from "@repo/database/models/form-field";
-import {createFieldInput, CreateFieldInputType, deleteFieldInput, DeleteFieldInputType, getFieldsInput, GetFieldsInputType, updateFieldInput, UpdateFieldInputType} from "./model";
-import { eq, db, max} from "@repo/database";
+import {createFieldInput, CreateFieldInputType, deleteFieldInput, DeleteFieldInputType, getFieldsInput, GetFieldsInputType, updateFieldInput, UpdateFieldInputType, reorderFieldsInput, ReorderFieldsInputType} from "./model";
+import { eq, db, max, asc, sql} from "@repo/database";
 
 function toLabelKey(label: string): string {
     return label.toLocaleLowerCase().trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
@@ -61,12 +61,24 @@ class FormFieldService {
 
     public async getFieldsByFormId(payload: GetFieldsInputType) {
         const {formId} = getFieldsInput.parse(payload);
-        const result = await db.select().from(formFieldsTable).where(eq(formFieldsTable.formId, formId));
+        const result = await db.select().from(formFieldsTable).where(eq(formFieldsTable.formId, formId)).orderBy(asc(formFieldsTable.index));
         return result.map(field => ({
             ...field,
             index: Number(field.index),
             isRequired: field.isRequired ?? false,
         }));
+    }
+
+    public async reorderFields(payload: ReorderFieldsInputType) {
+        const {formId, fieldIds} = reorderFieldsInput.parse(payload);
+        // Update each field's index based on position in the ordered array
+        const updates = fieldIds.map((fieldId, position) =>
+            db.update(formFieldsTable)
+                .set({ index: (position + 1).toFixed(2) })
+                .where(sql`${formFieldsTable.id} = ${fieldId} AND ${formFieldsTable.formId} = ${formId}`)
+        );
+        await Promise.all(updates);
+        return { success: true };
     }
 
 }

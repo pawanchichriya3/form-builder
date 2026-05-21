@@ -99,3 +99,19 @@ export const useGetFields = (formId: string) => {
         isLoading,
     }
 }
+
+export const useReorderFields = () => {
+    const utils = trpc.useUtils()
+
+    const {
+        mutateAsync: reorderFieldsAsync,
+        mutate: reorderFields,
+        status,
+    } = trpc.form.reorderFields.useMutation({
+        onSuccess: async () => {
+            await utils.form.invalidate()
+        }
+    })
+
+    return { reorderFieldsAsync, reorderFields, status }
+}

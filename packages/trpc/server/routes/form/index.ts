@@ -1,7 +1,7 @@
 import { formFieldService, formService, formSubmissionService } from "../../services";
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
-import { createFieldInputModel, createFieldOutputModel, createFormInputModel, createFormOutputModel, deleteFieldInputModel, deleteFieldOutputModel, getFieldsInputModel, getFieldsOutputModel, getFormByIdInputModel, getFormByIdOutputModel, getSubmissionsInputModel, getSubmissionsOutputModel, listFormOutputModel, submitFormInputModel, submitFormOutputModel, updateFieldInputModel, updateFieldOutputModel } from "./model";
+import { createFieldInputModel, createFieldOutputModel, createFormInputModel, createFormOutputModel, deleteFieldInputModel, deleteFieldOutputModel, getFieldsInputModel, getFieldsOutputModel, getFormByIdInputModel, getFormByIdOutputModel, getSubmissionsInputModel, getSubmissionsOutputModel, listFormOutputModel, reorderFieldsInputModel, reorderFieldsOutputModel, submitFormInputModel, submitFormOutputModel, updateFieldInputModel, updateFieldOutputModel } from "./model";
 import { z } from "zod";
 const TAGS = ["Form"];
 const getPath = generatePath("/form");
@@ -130,5 +130,16 @@ export const formRouter = router({
     }).input(getSubmissionsInputModel).output(getSubmissionsOutputModel).query(async ({input}) => {
         const submissions = await formSubmissionService.getSubmissionsByFormId(input);
         return submissions;
+    }),
+
+    reorderFields: authenticatedProcedure.meta({
+        openapi:{
+            method:"PUT",
+            path: getPath("/reorderFields"),
+            tags:TAGS,
+            protect:true
+        }
+    }).input(reorderFieldsInputModel).output(reorderFieldsOutputModel).mutation(async ({input}) => {
+        return await formFieldService.reorderFields(input);
     }),
 })

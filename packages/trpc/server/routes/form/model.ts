@@ -167,4 +167,13 @@ export const getSubmissionsOutputModel = z.array(z.object({
     createdAt: z.date().describe("Submission date"),
 }))
 
+export const reorderFieldsInputModel = z.object({
+    formId: z.string().uuid().describe("UUID of the form whose fields are being reordered"),
+    fieldIds: z.array(z.string().uuid()).min(1).describe("Ordered array of field IDs representing the new order")
+})
+
+export const reorderFieldsOutputModel = z.object({
+    success: z.boolean().describe("Whether the reorder was successful")
+})
+
 

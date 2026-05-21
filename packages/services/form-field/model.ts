@@ -35,3 +35,10 @@ export const getFieldsInput = z.object({
 })
 
 export type GetFieldsInputType = z.infer<typeof getFieldsInput>
+
+export const reorderFieldsInput = z.object({
+    formId: z.string().uuid().describe("UUID of the form whose fields are being reordered"),
+    fieldIds: z.array(z.string().uuid()).min(1).describe("Ordered array of field IDs representing the new order")
+})
+
+export type ReorderFieldsInputType = z.infer<typeof reorderFieldsInput>
