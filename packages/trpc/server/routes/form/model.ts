@@ -60,6 +60,14 @@ const formFieldObject = z.object({
         "PASSWORD",
         "YES_NO"
     ]).describe('Type of the form field'),
+
+    createdAt: z.date()
+        .nullable()
+        .describe('Creation date of the form field'),
+
+    updatedAt: z.date()
+        .nullable()
+        .describe('Last update date of the form field'),
 });
 
 export const createFieldInputModel = z.object({
@@ -88,7 +96,7 @@ export const updateFieldInputModel = z.object({
 
 export const updateFieldOutputModel = z.object({
     id: z.string().uuid().describe("UUID of the updated field"),
-    formId: z.string().uuid().describe("UUID of the form to which the field belongs"),
+    formId: z.string().uuid().nullable().describe("UUID of the form to which the field belongs"),
     label: z.string().max(255).describe("Label of the field"),
     labelKey: z.string().max(255).nullable().optional().describe("Label key of the field"),
     description: z.string().nullable().optional().describe("Description of the field"),
@@ -102,16 +110,61 @@ export const updateFieldOutputModel = z.object({
         "PASSWORD",
         "YES_NO"
     ]).describe("Type of the field"),
-    createdAt: z.date().describe("Creation date of the field"),
-    updatedAt: z.date().describe("Last update date of the field")
+    createdAt: z.date().nullable().describe("Creation date of the field"),
+    updatedAt: z.date().nullable().describe("Last update date of the field")
 })
 
 export const deleteFieldInputModel = z.object({
     fieldId: z.string().uuid().describe("UUID of the field to be deleted")
 })
 
+export const deleteFieldOutputModel = z.object({
+    id: z.string().uuid().describe("UUID of the deleted field")
+})
+
 export const getFieldsInputModel = z.object({
     formId: z.string().uuid().describe("UUID of the form whose fields are to be retrieved")
 })
+
+export const getFieldsOutputModel = z.array(formFieldObject)
+
+export const getFormByIdInputModel = z.object({
+    formId: z.string().uuid().describe("UUID of the form to retrieve")
+})
+
+export const getFormByIdOutputModel = z.object({
+    id: z.string().describe('ID of the form'),
+    title: z.string().describe('Title of the form'),
+    description: z.string().nullable().describe('Description of the form'),
+    fields: z.array(formFieldObject).describe('Fields of the form'),
+    createdAt: z.date().nullable().describe('Creation date of the form'),
+    updatedAt: z.date().nullable().describe('Last update date of the form')
+})
+
+export const submitFormInputModel = z.object({
+    formId: z.string().uuid().describe("UUID of the form being submitted"),
+    values: z.array(z.object({
+        formFieldId: z.string().uuid().describe("UUID of the form field"),
+        value: z.string().describe("Value of the field"),
+    })).describe("Array of field values"),
+})
+
+export const submitFormOutputModel = z.object({
+    id: z.string().uuid().describe("UUID of the created submission"),
+})
+
+export const getSubmissionsInputModel = z.object({
+    formId: z.string().uuid().describe("UUID of the form whose submissions are to be retrieved"),
+})
+
+export const getSubmissionsOutputModel = z.array(z.object({
+    id: z.string().uuid().describe("UUID of the submission"),
+    formId: z.string().uuid().describe("UUID of the form"),
+    value: z.array(z.object({
+        formFieldId: z.string().uuid().describe("UUID of the form field"),
+        value: z.string().describe("Value of the field"),
+    })).describe("Submitted field values"),
+    createdAt: z.date().describe("Submission date"),
+}))
 
 

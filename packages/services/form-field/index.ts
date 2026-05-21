@@ -23,7 +23,7 @@ class FormFieldService {
         if (!result || result.length === 0) throw new Error("Failed to create field");
         const created = result[0];
         if (!created) throw new Error("Failed to create field");
-        return {id: created.id, labelKey, index};
+        return {id: created.id, labelKey, index: Number(index)};
     }
 
     public async updateField(payload: UpdateFieldInputType) {
@@ -43,7 +43,11 @@ class FormFieldService {
         if (!result || result.length === 0) throw new Error("Failed to update field");
         const updated = result[0];
         if (!updated) throw new Error("Failed to update field");
-        return updated;
+        return {
+            ...updated,
+            index: Number(updated.index),
+            isRequired: updated.isRequired ?? false,
+        };
     }
 
     public async deleteField(payload: DeleteFieldInputType) {
@@ -58,7 +62,11 @@ class FormFieldService {
     public async getFieldsByFormId(payload: GetFieldsInputType) {
         const {formId} = getFieldsInput.parse(payload);
         const result = await db.select().from(formFieldsTable).where(eq(formFieldsTable.formId, formId));
-        return result;
+        return result.map(field => ({
+            ...field,
+            index: Number(field.index),
+            isRequired: field.isRequired ?? false,
+        }));
     }
 
 }

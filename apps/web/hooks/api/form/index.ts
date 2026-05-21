@@ -40,3 +40,13 @@ export const useListForms = () => {
         status
     }
 }
+
+export const useGetFormById = (formId: string) => {
+    const {data: form, error, isError, isLoading} = trpc.form.getFormById.useQuery({formId}, {enabled: !!formId})
+    return {
+        form,
+        error,
+        isError,
+        isLoading,
+    }
+}
